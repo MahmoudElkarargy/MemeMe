@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13104.12"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -9,16 +13,53 @@
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="MemeMe" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="zx2-0a-Zeh">
+                                <rect key="frame" x="16" y="45" width="343" height="597"/>
+                            </imageView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ra1-h3-JvY">
+                                <rect key="frame" x="0.0" y="623" width="375" height="44"/>
+                                <items>
+                                    <barButtonItem title="Pick" width="200" id="suE-3z-w5e">
+                                        <connections>
+                                            <action selector="pickAnImage:" destination="BYZ-38-t0r" id="sr5-O1-2vP"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem title="Camera" width="200" id="AJH-RF-2k2">
+                                        <connections>
+                                            <action selector="pickAnImageFromCamera:" destination="BYZ-38-t0r" id="TFf-SB-Odb"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </items>
+                            </toolbar>
+                        </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="zx2-0a-Zeh" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="3eD-rv-8Fc"/>
+                            <constraint firstItem="Ra1-h3-JvY" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="4U3-2S-QkK"/>
+                            <constraint firstItem="zx2-0a-Zeh" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="At7-4o-42q"/>
+                            <constraint firstItem="zx2-0a-Zeh" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="Hig-q4-WmR"/>
+                            <constraint firstItem="zx2-0a-Zeh" firstAttribute="centerX" secondItem="Ra1-h3-JvY" secondAttribute="centerX" id="JhF-yS-qe7"/>
+                            <constraint firstItem="zx2-0a-Zeh" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="25" id="h4K-uN-4Ut"/>
+                            <constraint firstItem="Ra1-h3-JvY" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="ham-QF-7GF"/>
+                            <constraint firstItem="Ra1-h3-JvY" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="sXu-WV-ecv"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Ra1-h3-JvY" secondAttribute="bottom" id="sjl-1i-G9G"/>
+                        </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
+                    <connections>
+                        <outlet property="cameraButton" destination="AJH-RF-2k2" id="axC-zt-nTl"/>
+                        <outlet property="imagePickerView" destination="zx2-0a-Zeh" id="6d5-ac-3ex"/>
+                        <outlet property="pickButton" destination="suE-3z-w5e" id="6u3-gb-ecz"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="136.80000000000001" y="133.5832083958021"/>
         </scene>
     </scenes>
 </document>
