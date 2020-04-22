@@ -41,5 +41,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>To create live mems.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>To create your memes.</string>
 </dict>
 </plist>
