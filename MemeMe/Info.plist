@@ -43,6 +43,8 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>To create live mems.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>To save your memes.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>To create your memes.</string>
 </dict>

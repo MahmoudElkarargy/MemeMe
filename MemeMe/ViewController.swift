@@ -10,12 +10,17 @@ import UIKit
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate,
 UINavigationControllerDelegate, UITextFieldDelegate {
-
+    @IBOutlet weak var shareButton: UIBarButtonItem!
+    @IBOutlet weak var cancelButton: UIBarButtonItem!
+    @IBOutlet weak var bottomToolBar: UIToolbar!
+    @IBOutlet weak var upperToolBar: UIToolbar!
     @IBOutlet weak var bottomTextField: UITextField!
     @IBOutlet weak var imagePickerView: UIImageView!
     @IBOutlet weak var pickButton: UIBarButtonItem!
     @IBOutlet weak var cameraButton: UIBarButtonItem!
     @IBOutlet weak var topTextField: UITextField!
+    
+    var activeTextField : UITextField? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,8 +32,51 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         bottomTextField.defaultTextAttributes = memeTextAttributes
         topTextField.textAlignment = .center
         bottomTextField.textAlignment = .center
+        shareButton.isEnabled = false
+        cancelButton.isEnabled = false
     }
 
+    struct Meme {
+        var topText: String?
+        var bottomText: String?
+        var originalImage: UIImage?
+        var memedImage: UIImage?
+        
+    }
+    @IBAction func share(){
+        let memedImage = generateMemedImage()
+        let controller = UIActivityViewController(activityItems: [memedImage], applicationActivities: nil)
+        present(controller,animated: true, completion: nil)
+        
+        controller.completionWithItemsHandler = { activity, completed, items, error in
+        if completed {
+            self.save()
+            return
+        }
+        }
+    }
+    func save() {
+            // Create the meme
+        _ = Meme(topText: topTextField.text!, bottomText: bottomTextField.text!, originalImage: imagePickerView.image!, memedImage: generateMemedImage())
+    }
+    
+    func generateMemedImage() -> UIImage {
+
+        self.upperToolBar.isHidden = true
+        self.bottomToolBar.isHidden = true
+        
+        // Render view to an image
+        UIGraphicsBeginImageContext(self.view.frame.size)
+        view.drawHierarchy(in: self.view.frame, afterScreenUpdates: true)
+        let memedImage:UIImage = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        
+        self.upperToolBar.isHidden = false
+        self.bottomToolBar.isHidden = false
+        
+        return memedImage
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         cameraButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
@@ -55,6 +103,11 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         
         if let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
             imagePickerView.image = image
+            shareButton.isEnabled = true
+            cancelButton.isEnabled = true
+            cameraButton.isEnabled = false
+            pickButton.isEnabled = false
+            
         }
         else{
             //Show Error msg here!
@@ -69,6 +122,16 @@ UINavigationControllerDelegate, UITextFieldDelegate {
             self.present(controller, animated: true, completion: nil)
         }
         self.dismiss(animated: true, completion: nil)
+    }
+    
+    @IBAction func resetAfterCancel(){
+        imagePickerView.image = nil
+        topTextField.text = "TOP"
+        bottomTextField.text = "BOTTOM"
+        cameraButton.isEnabled = true
+        pickButton.isEnabled = true
+        shareButton.isEnabled = false
+        cancelButton.isEnabled = false
     }
     
     @IBAction func pickAnImageFromCamera(_ sender: Any) {
@@ -86,9 +149,11 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         else if textField.text == "BOTTOM"{
             bottomTextField.text = ""
         }
+        self.activeTextField = textField
     }
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
+        self.activeTextField = nil
         return true;
     }
     
@@ -106,9 +171,12 @@ UINavigationControllerDelegate, UITextFieldDelegate {
     }
     
     @objc func keyboardWillShow(_ notification: Notification){
-        view.frame.origin.y -= getKeyboardHeight(notification)
-        print ("Height is \(getKeyboardHeight(notification))")
-        print("frame: \(view.frame.origin.y)")
+        if let activeTextField = activeTextField {
+            let bottomOfTextField = activeTextField.convert(activeTextField.bounds, to: self.view).maxY;
+            if bottomOfTextField > getKeyboardHeight(notification){
+                view.frame.origin.y -= getKeyboardHeight(notification)
+            }
+        }
     }
     
     @objc func keyboardWillHide(_ notification: Notification){
