@@ -27,14 +27,8 @@ UINavigationControllerDelegate, UITextFieldDelegate {
     //MARK: -Override funcs
     override func viewDidLoad() {
         super.viewDidLoad()
-        topTextField.text = "TOP"
-        bottomTextField.text = "BOTTOM"
-        self.topTextField.delegate = self
-        self.bottomTextField.delegate = self
-        topTextField.defaultTextAttributes = memeTextAttributes
-        bottomTextField.defaultTextAttributes = memeTextAttributes
-        topTextField.textAlignment = .center
-        bottomTextField.textAlignment = .center
+        setupTextField(tf: topTextField, text: "TOP")
+        setupTextField(tf: bottomTextField, text: "BOTTOM")
         shareButton.isEnabled = false
         cancelButton.isEnabled = false
     }
@@ -55,7 +49,6 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         var bottomText: String?
         var originalImage: UIImage?
         var memedImage: UIImage?
-        
     }
     
     
@@ -71,18 +64,19 @@ UINavigationControllerDelegate, UITextFieldDelegate {
     
     
     //MARK: -PickImage.
+    func chooseImageFromCameraOrPhoto(source: UIImagePickerController.SourceType) {
+        let pickerController = UIImagePickerController()
+        pickerController.delegate = self
+        pickerController.allowsEditing = true
+        pickerController.sourceType = source
+        present(pickerController, animated: true, completion: nil)
+    }
+    
     @IBAction func pickAnImage(_ sender: Any) {
-        let controller = UIImagePickerController()
-        controller.delegate = self
-        controller.sourceType = .photoLibrary
-        self.present(controller, animated: true, completion: nil)
+        chooseImageFromCameraOrPhoto(source: .photoLibrary)
     }
     @IBAction func pickAnImageFromCamera(_ sender: Any) {
-        
-        let imagePicker = UIImagePickerController()
-        imagePicker.delegate = self
-        imagePicker.sourceType = .camera
-        present(imagePicker, animated: true, completion: nil)
+        chooseImageFromCameraOrPhoto(source: .camera)
     }
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
@@ -114,6 +108,19 @@ UINavigationControllerDelegate, UITextFieldDelegate {
     }
     
     //MARK: -TextFields.
+    func setupTextField(tf: UITextField, text: String) {
+        tf.defaultTextAttributes = [
+            NSAttributedString.Key.foregroundColor : UIColor.white,
+            NSAttributedString.Key.strokeColor : UIColor.black,
+            NSAttributedString.Key.font : UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
+            NSAttributedString.Key.strokeWidth: -4.0,
+        ]
+        tf.textColor = UIColor.white
+        tf.tintColor = UIColor.white
+        tf.textAlignment = .center
+        tf.text = text
+        tf.delegate = self
+    }
     func textFieldDidBeginEditing(_ textField: UITextField) {
         if textField.text == "TOP"{
             topTextField.text = ""
@@ -128,12 +135,6 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         self.activeTextField = nil
         return true;
     }
-    let memeTextAttributes: [NSAttributedString.Key: Any] = [
-        NSAttributedString.Key.strokeColor: UIColor.black ,
-        NSAttributedString.Key.foregroundColor: UIColor.white,
-        NSAttributedString.Key.font: UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
-        NSAttributedString.Key.strokeWidth:  -3.0
-    ]
     func getKeyboardHeight(_ notification: Notification) -> CGFloat{
         let userInfo = notification.userInfo
         let keyboardSize = userInfo![UIResponder.keyboardFrameEndUserInfoKey] as! NSValue
@@ -157,7 +158,6 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         _ = Meme(topText: topTextField.text!, bottomText: bottomTextField.text!, originalImage: imagePickerView.image!, memedImage: generateMemedImage())
     }
     func generateMemedImage() -> UIImage {
-
         self.upperToolBar.isHidden = true
         self.bottomToolBar.isHidden = true
         
@@ -181,30 +181,17 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         if completed {
             self.save()
             return
+            }
         }
     }
-}
-    
-    
-    
-    
-    
-    
-
-    
     
     @IBAction func resetAfterCancel(){
         imagePickerView.image = nil
         topTextField.text = "TOP"
         bottomTextField.text = "BOTTOM"
-        cameraButton.isEnabled = true
+        cameraButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
         pickButton.isEnabled = true
         shareButton.isEnabled = false
         cancelButton.isEnabled = false
     }
-    
-    
-    
-    
 }
-
