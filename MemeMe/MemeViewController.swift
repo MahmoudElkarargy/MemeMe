@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  MemeViewController.swift
 //  MemeMe
 //
 //  Created by Mahmoud Elkarargy on 4/22/20.
@@ -8,10 +8,13 @@
 
 import UIKit
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate,
-UINavigationControllerDelegate, UITextFieldDelegate {
+class MemeViewController: UIViewController, UIImagePickerControllerDelegate,
+                            UINavigationControllerDelegate {
+    // MARK: Constants
+    let textPositionScale: CGFloat = 0.9
+    let keyboardViewPositionScale: CGFloat = 0.9
     
-    //MARK: - Declerations and variables.
+    //MARK: - Outlets.
     @IBOutlet weak var shareButton: UIBarButtonItem!
     @IBOutlet weak var cancelButton: UIBarButtonItem!
     @IBOutlet weak var bottomToolBar: UIToolbar!
@@ -21,10 +24,25 @@ UINavigationControllerDelegate, UITextFieldDelegate {
     @IBOutlet weak var pickButton: UIBarButtonItem!
     @IBOutlet weak var cameraButton: UIBarButtonItem!
     @IBOutlet weak var topTextField: UITextField!
+    @IBOutlet weak var topTextConstraint: NSLayoutConstraint!
+    @IBOutlet weak var bottomTextConstraint: NSLayoutConstraint!
+     
+    // MARK: Hold current image information
+    var imageHeight: CGFloat = 0.0
+    var imageWidth: CGFloat = 0.0
+    var scale: CGFloat = 0.0
+    var memedImage: UIImage!
     
-    var activeTextField : UITextField? = nil
+
+    // MARK: Text Field Delegate objects
+    let memeTextDelegate = MemeTextFieldDelegate()
     
     //MARK: -Override funcs
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        cameraButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
+        subscribeToKeyboardNotifications()
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTextField(tf: topTextField, text: "TOP")
@@ -32,27 +50,19 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         shareButton.isEnabled = false
         cancelButton.isEnabled = false
     }
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        cameraButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
-        subscribeToKeyboardNotifications()
-    }
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         unsubscribeToKeyboardNotifications()
     }
-    
-    
-    //MARK: -Meme Struct.
-    struct Meme {
-        var topText: String?
-        var bottomText: String?
-        var originalImage: UIImage?
-        var memedImage: UIImage?
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Move text to correct place
+        setImageText()
     }
     
     
-    //MARK: -Notifications.
+    
+    //MARK: -Keyboard functions to avoid overlaying onto text (Notifications).
     func subscribeToKeyboardNotifications(){
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -63,11 +73,10 @@ UINavigationControllerDelegate, UITextFieldDelegate {
     }
     
     
-    //MARK: -PickImage.
+    //MARK: -UIImagePicker Delegate functions.
     func chooseImageFromCameraOrPhoto(source: UIImagePickerController.SourceType) {
         let pickerController = UIImagePickerController()
         pickerController.delegate = self
-        pickerController.allowsEditing = true
         pickerController.sourceType = source
         present(pickerController, animated: true, completion: nil)
     }
@@ -87,6 +96,8 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         
         if let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
             imagePickerView.image = image
+            // Set the image text
+            setImageText()
             shareButton.isEnabled = true
             cancelButton.isEnabled = true
             cameraButton.isEnabled = false
@@ -107,19 +118,43 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         self.dismiss(animated: true, completion: nil)
     }
     
+    // MARK: Image Text helper functions
+    func setImageText() {
+        // Get the image dimensions and scale
+        let imageViewHeight = imagePickerView.bounds.height
+        let imageViewWidth = imagePickerView.bounds.width
+        imageHeight = imagePickerView.intrinsicContentSize.height
+        imageWidth = imagePickerView.intrinsicContentSize.width
+        // Calculate image scale based on device orientation
+        if UIDevice.current.orientation.isPortrait {
+            scale = imageViewWidth / imageWidth
+        } else {
+            scale = imageViewHeight / imageHeight
+        }
+        let middle = imageViewHeight / 2
+        // Move the meme text onto the image
+        // Multiply by textPositionScale to move slightly into image
+        topTextConstraint.constant =
+            middle - (scale * (imageHeight / 2) * textPositionScale)
+        bottomTextConstraint.constant =
+            middle - (scale * (imageHeight / 2) * textPositionScale)
+    }
+    
     //MARK: -TextFields.
     func setupTextField(tf: UITextField, text: String) {
-        tf.defaultTextAttributes = [
-            NSAttributedString.Key.foregroundColor : UIColor.white,
-            NSAttributedString.Key.strokeColor : UIColor.black,
-            NSAttributedString.Key.font : UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
-            NSAttributedString.Key.strokeWidth: -4.0,
-        ]
-        tf.textColor = UIColor.white
-        tf.tintColor = UIColor.white
-        tf.textAlignment = .center
+        let attributes = getAttributes()
         tf.text = text
-        tf.delegate = self
+        tf.delegate = memeTextDelegate
+        tf.defaultTextAttributes = attributes
+    }
+    func getAttributes() -> [NSAttributedString.Key : Any] {
+        var attributes = memeTextDelegate.memeTextAttributes
+        // Add centering style
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .center
+        attributes.merge([NSAttributedString.Key.paragraphStyle: paragraphStyle],
+                         uniquingKeysWith: { (current, _) in current })
+        return attributes
     }
     func textFieldDidBeginEditing(_ textField: UITextField) {
         if textField.text == "TOP"{
@@ -128,11 +163,9 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         else if textField.text == "BOTTOM"{
             bottomTextField.text = ""
         }
-        self.activeTextField = textField
     }
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
-        self.activeTextField = nil
         return true;
     }
     func getKeyboardHeight(_ notification: Notification) -> CGFloat{
@@ -141,12 +174,12 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         return keyboardSize.cgRectValue.height
     }
     @objc func keyboardWillShow(_ notification: Notification){
-        if let activeTextField = activeTextField {
-            let bottomOfTextField = activeTextField.convert(activeTextField.bounds, to: self.view).maxY;
-            if bottomOfTextField > getKeyboardHeight(notification){
-                view.frame.origin.y -= getKeyboardHeight(notification)
-            }
-        }
+//        if let activeTextField = activeTextField {
+//            let bottomOfTextField = activeTextField.convert(activeTextField.bounds, to: self.view).maxY;
+//            if bottomOfTextField > getKeyboardHeight(notification){
+//                view.frame.origin.y -= getKeyboardHeight(notification)
+//            }
+//        }
     }
     @objc func keyboardWillHide(_ notification: Notification){
         view.frame.origin.y = 0
@@ -154,8 +187,13 @@ UINavigationControllerDelegate, UITextFieldDelegate {
     
     //MARK: -Save Image, Share and Cancel.
     func save() {
-            // Create the meme
-        _ = Meme(topText: topTextField.text!, bottomText: bottomTextField.text!, originalImage: imagePickerView.image!, memedImage: generateMemedImage())
+        // Create the meme
+        let meme = Meme(topText: topTextField.text!, bottomText: bottomTextField.text!, originalImage: imagePickerView.image!, memedImage: generateMemedImage())
+        
+        // Add it to the memes array in the Application Delegate
+        let object = UIApplication.shared.delegate
+        let appDelegate = object as! AppDelegate
+//        appDelegate.memes.append(meme)
     }
     func generateMemedImage() -> UIImage {
         self.upperToolBar.isHidden = true
