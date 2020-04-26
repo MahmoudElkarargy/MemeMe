@@ -46,9 +46,9 @@ class SharedMemeTableViewController: UIViewController, UITableViewDataSource, UI
         return cell
     }
 
-    // MARK: Show Meme detail view
-//    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        Helper.showMemeDetail(self.storyboard!, navigationController!,
-//                              memes, indexPath)
-//    }
+//     MARK: Show Meme detail view
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        Helper.showMemeDetail(self.storyboard!, navigationController!,
+                              memes, indexPath)
+    }
 }
