@@ -55,10 +55,6 @@
 			isa = PBXGroup;
 			children = (
 				D613D6302450ADFB00ECCE8D /* MemeMe */,
-				D6A11C552454846100F2CD71 /* Views */,
-				D6A11C542454844000F2CD71 /* Controllers */,
-				D6D7928F2453B94100DC819B /* Text Field Delegates */,
-				D6D7928E2453B91D00DC819B /* Model */,
 				D613D62F2450ADFB00ECCE8D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -75,8 +71,9 @@
 			isa = PBXGroup;
 			children = (
 				D613D6312450ADFB00ECCE8D /* AppDelegate.swift */,
-				D613D6382450AE0200ECCE8D /* Assets.xcassets */,
-				D613D63A2450AE0200ECCE8D /* LaunchScreen.storyboard */,
+				D6D7928E2453B91D00DC819B /* Model */,
+				D6A11C552454846100F2CD71 /* Views */,
+				D6A11C542454844000F2CD71 /* Controllers */,
 				D613D63D2450AE0200ECCE8D /* Info.plist */,
 			);
 			path = MemeMe;
@@ -99,7 +96,10 @@
 		D6A11C552454846100F2CD71 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				D6D7928F2453B94100DC819B /* Text Field Delegates */,
 				D613D6352450ADFB00ECCE8D /* Main.storyboard */,
+				D613D6382450AE0200ECCE8D /* Assets.xcassets */,
+				D613D63A2450AE0200ECCE8D /* LaunchScreen.storyboard */,
 			);
 			path = Views;
 			sourceTree = "<group>";
